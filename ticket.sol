@@ -11,8 +11,8 @@ contract Ticket{
     uint amount;
   }
 
-  address public minter;
-  mapping (address => data[]) public balances;  //餘額以data[]呈現
+  address[] public minter;
+  mapping (address => data[]) balances;  //餘額以data[]呈現
   mapping(uint => string) str;  
   uint[] day_number = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   uint nowyear = 1970;
@@ -27,10 +27,11 @@ contract Ticket{
 
 
   function Ticket(){
-    minter = msg.sender;
+    if(minter.length < 1 ){minter.push(msg.sender);}
     now_day();
     init_str();
   }
+
   
   //初始化數字轉字串要的元素
   function init_str(){
@@ -143,19 +144,19 @@ contract Ticket{
   //新增票券（只有最高權限人可以新增，且不能新增已有的票）
   function newticket(uint number, string name, uint year, uint month, uint day, uint amount) {
     //只有minter可以新增
-    if(minter == msg.sender) {          
+    if(minter[0] == msg.sender) {          
       //不存在且時限在now以後的
-      if(isexist(minter, number) == 1000 && intime(year, month, day) && amount > 0){     
-          uint empty = isempty(minter);
+      if(isexist(msg.sender, number) == 1000 && intime(year, month, day) && amount > 0){     
+          uint empty = isempty(msg.sender);
           if(empty == 1000){  
-              balances[minter].push(data(number, name, year, month, day, amount));
+              balances[msg.sender].push(data(number, name, year, month, day, amount));
           }else{
-              balances[minter][empty].number = number;
-              balances[minter][empty].name = name;
-              balances[minter][empty].year = year;
-              balances[minter][empty].month = month;
-              balances[minter][empty].day = day;
-              balances[minter][empty].amount = amount;
+              balances[msg.sender][empty].number = number;
+              balances[msg.sender][empty].name = name;
+              balances[msg.sender][empty].year = year;
+              balances[msg.sender][empty].month = month;
+              balances[msg.sender][empty].day = day;
+              balances[msg.sender][empty].amount = amount;
           }
 
           New(number, name, dateformat(year, month, day), amount, dateformat(nowyear, nowmonth, nowday));
@@ -222,6 +223,11 @@ contract Ticket{
           date = dateformat(balances[from][exist].year, balances[from][exist].month, balances[from][exist].day);
           amount = balances[from][exist].amount;
       }
+  }
+
+  //回履當前票卷總數（如果要看總流通票數，看minter即可，因為他有全部的票）
+  function total_ticket_num(address from) public returns (uint){
+    return balances[from].length;
   }
 
 }
