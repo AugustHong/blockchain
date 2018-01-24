@@ -1,7 +1,7 @@
 pragma solidity ^0.4.11;
 
 import "./player.sol";
-import "./HoldingUnit.sol"
+import "./HoldingUnit.sol";
 
 contract CheckUnit is Player{
 
