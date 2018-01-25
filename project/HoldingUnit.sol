@@ -74,7 +74,7 @@ contract HoldingUnit is Player {
   //建立新票
   function add(uint number, string name, uint year, uint month, uint day, uint amount){
   	if(intime(year, month, day) && amount > 0){
-  		balances[msg.sender] = ticket(number, name, msg.sender, year, month, day, amount);
+  		balances[msg.sender].push(ticket(number, name, msg.sender, year, month, day, amount));
 
   		New(number, name, msg.sender, year, month, day, amount, nowyear, nowmonth, nowday);
   	}
