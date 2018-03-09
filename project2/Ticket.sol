@@ -17,6 +17,7 @@ contract Ticket{
   uint nowyear = 1970;
   uint nowmonth;
   uint nowday;
+  uint[] day_number = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 
   event New(address holding_address, string activity_name, uint year, uint month, uint day, uint amount, uint price, uint t_year, uint t_month, uint t_day);
@@ -97,7 +98,7 @@ contract Ticket{
 
   //修改票卷價錢（此邊的start和end是使用者輸入第幾張票=>所以要做時要減1才會是陣列）
   function modify_price(string activity_name, uint start, uint end, uint price) returns (bool success){
-    require(start > 0 && end > 0 && end >= start && data[activity_name].length >= end && price >0 && msg.sender == data[activity_name][i].hodling);
+    require(start > 0 && end > 0 && end >= start && data[activity_name].length >= end && price >0 && msg.sender == data[activity_name][i].holding);
 
     for(uint i = start -1; i < end ; i++){
 	data[activity_name][i].price = price;
@@ -110,13 +111,13 @@ contract Ticket{
 
 
   //查詢這張票幾號是空的
-  function search_empty(string activity_name) return (uint number){
+  function search_empty(string activity_name) returns (uint number){
     require(data[activity_name].length >0);
 
     uint x;
 
     for(uint i = 0; i < data[activity_name].length; i++){
-        if(data[activity_name][i].owner == data[activity_name][i].hodling){
+        if(data[activity_name][i].owner == data[activity_name][i].holding){
             x = i+1;
             break;
         }
@@ -127,7 +128,7 @@ contract Ticket{
 
 
   //驗票（確認這張票是使用者的，記得使用者輸入的都是第幾張，所以做處理時都要再減1才是陣列的號碼）
-  function check(string activity_name, uint number) return (bool is_owner){
+  function check(string activity_name, uint number) returns (bool is_owner){
     require(number > 0 && data[activity_name].length + 1 >= number);
 
     if(data[activity_name][number-1].owner == msg.sender){
@@ -138,7 +139,7 @@ contract Ticket{
 
 
   //轉移票卷（此的number仍然是使用者口中的數字，所以要做處理時要再減1）
-  function transaction_ticket(address from, address receiver, string activity_name, uint number) return (bool success) {
+  function transaction_ticket(address from, address receiver, string activity_name, uint number) returns (bool success) {
     require(data[activity_name].length >0 && data[activity_name][number-1].owner == from && number >0 && data[activity_name].length +1 >= number);
 
     data[activity_name][number-1].owner = receiver;
