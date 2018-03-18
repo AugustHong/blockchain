@@ -86,7 +86,10 @@ contract Ticket{
   function newticket(string activity_name, uint year, uint month, uint day, uint price, uint amount) returns (bool success){
     require(intime(year, month, day) && amount > 0 && price >0);
 
-    for(uint i = data[activity_name].length ; i < data[activity_name].length + amount; i++){
+    uint x;
+    if(data[activity_name].length <=0){x = 0;}else{x = data[activity_name].length;}
+
+    for(uint i = x ; i < x + amount; i++){
         data[activity_name].push(Ticket_content(msg.sender, msg.sender, year, month, day, price));
     }
 
