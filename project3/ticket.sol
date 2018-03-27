@@ -194,7 +194,7 @@ contract Ticket{
 
   //得到holding和owner（較為隱密，所以用函式取得，而不在變數前加上public） => 0=holding，1=owner
   function get_data(uint num) public returns (string){
-    require(minter[0] == msg.sender && num >=0 && num <=0 && is_build == true);
+    require(minter[0] == msg.sender && num >=0 && num <=1 && is_build == true);
 
     if(num == 0){return holding;}
     if(num == 1){return owner;}
