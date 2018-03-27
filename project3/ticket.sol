@@ -202,8 +202,8 @@ contract Ticket{
 
 
   //銷毀合約
-  function kill() returns (bool){
-    if(msg.sender == minter[0]){selfdestruct(minter[0]); return true;} else {return false;}
+  function kill(){
+    if(msg.sender == minter[0]){selfdestruct(minter[0]);}
   }
 
 }
