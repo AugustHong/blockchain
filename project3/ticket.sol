@@ -21,6 +21,9 @@ contract Ticket{
   uint nowmonth;
   uint nowday;
   uint[] day_number = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  
+  //一些處理字串用的相關變數
+  string w;
 
   //相關event
   event Build(string activity_name, uint s_time, uint e_time, uint price, string holding, uint n_time);
@@ -125,14 +128,21 @@ contract Ticket{
     if(x == 0){return true;}else{return false;}
   }
 
-  //假設兩字串長度皆相同（這只是讓存到區塊上的資料不會一眼就會到資料而做的處理）
+  //（這只是讓存到區塊上的資料不會一眼就會到資料而做的處理）
   function interlock_str(string a, string b) public returns (string){
+
+    if (bytes(b).length > bytes(a).length){w = a; a = b; b=w;}  //如果長度不一樣，保持a的長度是最長的
+
     string z;
     bytes(z).length = bytes(a).length + bytes(b).length;
 
-    for(uint i = 0; i < bytes(a).length; i = i + 1){
+    for(uint i = 0; i < bytes(b).length; i = i + 1){
       bytes(z)[i * 2] = bytes(a)[i];
       bytes(z)[i * 2 + 1] = bytes(b)[i];
+    }
+
+    for(uint j = 0 ; j < (bytes(a).length - bytes(b).length); j++){
+      bytes(z)[bytes(b).length * 2 + j] = bytes(a)[bytes(b).length + j];
     }
 
     return z;
