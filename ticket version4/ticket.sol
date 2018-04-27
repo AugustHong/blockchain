@@ -18,6 +18,9 @@ contract Ticket{
   //看是否建置過（沒建置過不能set，且只能建置一次）
   bool public is_build = false;
 
+  //看是否已使用過
+  bool public is_used = false;
+
   //時間相關處理
   uint nowyear = 1970;
   uint nowmonth;
@@ -175,7 +178,7 @@ contract Ticket{
 
   //修改時間
   function set_time(uint s_time, uint e_time) public returns (bool){
-    require(minter[0] == msg.sender && s_time >=0 && e_time >=0 && e_time >= s_time && date_format_check(s_time, 0) && date_format_check(e_time, 0) && date_format_check(e_time, 1) && is_build == true);
+    require(minter[0] == msg.sender && s_time >=0 && e_time >=0 && e_time >= s_time && date_format_check(s_time, 0) && date_format_check(e_time, 0) && date_format_check(e_time, 1) && is_build == true && is_used == false);
 
     start_time = s_time;
     end_time = e_time;
@@ -187,7 +190,7 @@ contract Ticket{
 
   //修改價錢
   function set_price(uint money) public returns (bool){
-    require(minter[0] == msg.sender && money >=0 && is_build == true);
+    require(minter[0] == msg.sender && money >=0 && is_build == true && is_used == false);
 
     price = money;
 
@@ -199,7 +202,7 @@ contract Ticket{
 
   //所有權轉移（要變2個：owner 和 o_addr）
   function transaction(string original_owner, string now_owner, address now_addr) public returns (bool){
-    require(minter[0] == msg.sender && string_match(original_owner, owner) && is_build == true);
+    require(minter[0] == msg.sender && string_match(original_owner, owner) && is_build == true && is_used == false);
 
     owner = now_owner;
     o_addr = now_addr;
@@ -219,15 +222,17 @@ contract Ticket{
 
   //驗證票卷（只有票持有人可以呼叫，如果成功就會要event，就代表這票的確是他的）
   function revoke(string h_username) public {
-    if(msg.sender != o_addr || string_match(owner, h_username) == false || is_build == false) throw;
+    if(msg.sender != o_addr || string_match(owner, h_username) == false || is_build == false || is_used == true) throw;
 
     Revoke(act_id);
   }
 
 
-  //銷毀合約
-  function kill(){
-    if(msg.sender == minter[0]){selfdestruct(minter[0]);}
+  //使用票卷，所以要改變is_used的值
+  function use(){
+    require(minter[0] == msg.sender && is_used == false && end_time >= (nowyear*10000 + nowmonth*100 + nowday) && is_build == true);
+
+    is_used = true;
   }
 
 }
