@@ -221,8 +221,8 @@ contract Ticket{
   }
 
   //驗證票卷（只有票持有人可以呼叫，如果成功就會要event，就代表這票的確是他的）
-  function revoke(string h_username) public {
-    if(msg.sender != o_addr || string_match(owner, h_username) == false || is_build == false || is_used == true) throw;
+  function revoke() public {
+    if(msg.sender != o_addr || is_build == false || is_used == true) throw;
 
     Revoke(act_id);
   }
