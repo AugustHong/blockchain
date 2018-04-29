@@ -230,7 +230,7 @@ contract Ticket{
 
   //使用票卷，所以要改變is_used的值
   function use(){
-    require(minter[0] == msg.sender && is_used == false && end_time >= (nowyear*10000 + nowmonth*100 + nowday) && is_build == true);
+    require(minter[0] == msg.sender && is_used == false && end_time >= (nowyear*10000 + nowmonth*100 + nowday) && is_build == true && start_time <= (nowyear*10000 + nowmonth*100 + nowday));
 
     is_used = true;
   }
