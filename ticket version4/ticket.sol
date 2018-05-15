@@ -6,7 +6,6 @@ contract Ticket{
 
   //票卷的資料
   string public act_id;
-  string public activity_name;
   uint public start_time;
   uint public end_time;
   uint public price;
@@ -21,6 +20,9 @@ contract Ticket{
   //看是否已使用過
   bool public is_used = false;
 
+  //看是否已過期
+  bool public is_expired = false;
+
   //時間相關處理
   uint nowyear = 1970;
   uint nowmonth;
@@ -31,7 +33,7 @@ contract Ticket{
   string w;
 
   //相關event
-  event Build(string id, string activity_name, uint s_time, uint e_time, uint price, uint n_time);
+  event Build(string id, uint s_time, uint e_time, uint price, uint n_time);
   event Set_time(uint s_time, uint e_time, uint n_time);
   event Set_price(uint money, uint n_time);
   event Transaction(string data, uint n_time);
@@ -156,12 +158,11 @@ contract Ticket{
 
 
   //建立票卷
-  function build(string name, uint s_time, uint e_time, uint p, string h, string id, address addr) public returns (bool){
+  function build(uint s_time, uint e_time, uint p, string h, string id, address addr) public returns (bool){
 
-    require(minter[0] == msg.sender && p >=0 && s_time >=0 && e_time >=0 && e_time >= s_time && date_format_check(s_time, 0) && date_format_check(e_time, 0) && date_format_check(e_time, 1) && is_build == false);
+    require(minter[0] == msg.sender && p >=0 && s_time >=0 && e_time >=0 && e_time >= s_time && date_format_check(s_time, 0) && date_format_check(e_time, 0) && date_format_check(e_time, 1) && is_build == false && is_expired == false);
 
     act_id = id;
-    activity_name = name;
     start_time = s_time;
     end_time = e_time;
     price = p;
@@ -171,14 +172,14 @@ contract Ticket{
 
     is_build = true;
 
-    Build(id, name, s_time, e_time, p, nowyear*10000 + nowmonth*100 + nowday);
+    Build(id, s_time, e_time, p, nowyear*10000 + nowmonth*100 + nowday);
 
     return true;
   }
 
   //修改時間
   function set_time(uint s_time, uint e_time) public returns (bool){
-    require(minter[0] == msg.sender && s_time >=0 && e_time >=0 && e_time >= s_time && date_format_check(s_time, 0) && date_format_check(e_time, 0) && date_format_check(e_time, 1) && is_build == true && is_used == false);
+    require(minter[0] == msg.sender && s_time >=0 && e_time >=0 && e_time >= s_time && date_format_check(s_time, 0) && date_format_check(e_time, 0) && date_format_check(e_time, 1) && is_build == true && is_used == false && is_expired == false);
 
     start_time = s_time;
     end_time = e_time;
@@ -190,7 +191,7 @@ contract Ticket{
 
   //修改價錢
   function set_price(uint money) public returns (bool){
-    require(minter[0] == msg.sender && money >=0 && is_build == true && is_used == false);
+    require(minter[0] == msg.sender && money >=0 && is_build == true && is_used == false && is_expired == false);
 
     price = money;
 
@@ -202,7 +203,7 @@ contract Ticket{
 
   //所有權轉移（要變2個：owner 和 o_addr）
   function transaction(string original_owner, string now_owner, address now_addr) public returns (bool){
-    require(minter[0] == msg.sender && string_match(original_owner, owner) && is_build == true && is_used == false);
+    require(minter[0] == msg.sender && string_match(original_owner, owner) && is_build == true && is_used == false && is_expired == false);
 
     owner = now_owner;
     o_addr = now_addr;
@@ -222,7 +223,7 @@ contract Ticket{
 
   //驗證票卷（只有票持有人可以呼叫，如果成功就會要event，就代表這票的確是他的）
   function revoke() public {
-    if(msg.sender != o_addr || is_build == false || is_used == true) throw;
+    if(msg.sender != o_addr || is_build == false || is_used == true || is_expired == true) throw;
 
     Revoke(act_id);
   }
@@ -230,9 +231,17 @@ contract Ticket{
 
   //使用票卷，所以要改變is_used的值
   function use(){
-    require(minter[0] == msg.sender && is_used == false && end_time >= (nowyear*10000 + nowmonth*100 + nowday) && is_build == true && start_time <= (nowyear*10000 + nowmonth*100 + nowday));
+    require(minter[0] == msg.sender && is_used == false && end_time >= (nowyear*10000 + nowmonth*100 + nowday) && is_build == true && is_expired == false);
 
     is_used = true;
+  }
+
+
+  //票卷過期
+  function expired(){
+    require(minter[0] == msg.sender && is_used == false && is_build == true);
+
+    is_expired = true;
   }
 
 }
